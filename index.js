@@ -12,7 +12,7 @@ conn(process.env.DATABASE_URL);
 //setting json middleware
 app.use(express.json());
 
-//setup cors
+//setup cors *without cors this will work in postman Not in Browser
 app.use(cors({
     origin: JSON.parse(process.env.CLIENT_URLS),
     methods: JSON.parse(process.env.ALLOWED_METHODS),

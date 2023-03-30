@@ -3,7 +3,7 @@ const router = express.Router();
 const controller = require('./controller');
 
 //User Routes
-router.get('/users/:uname/:pwd', controller.user.userLogin); //For Login The user
+router.get('/users', controller.user.userLogin); //For Login The user
 router.post('/users', controller.user.userCreate); // For Creating User
 router.put('/users/:id', controller.user.userUpdate); //identify using the id and remaining data will be send in body using json
 router.delete('/users/:id', controller.user.userDelete); //Idetify id and remove the user
