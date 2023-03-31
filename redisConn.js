@@ -14,6 +14,7 @@ const connectRedis = () => {
     client.on('error', (error) => {
         console.error(error);
     });
+    
     return { client, redis };
 }
 
