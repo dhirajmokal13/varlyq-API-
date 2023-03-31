@@ -1,9 +1,10 @@
-const dotenv = require('dotenv');
-dotenv.config();
+const dotenv = require('dotenv').config();;
 const schema = require('./Models');
 const hash = require('bcrypt');
 const Jwt = require('jsonwebtoken');
 const jwtKey = process.env.JWTKEY;
+const connectRedis = require('./redisConn');
+const client = connectRedis();
 
 class UserController {
 
@@ -14,16 +15,19 @@ class UserController {
             if (result != null) {
                 const isMatch = await hash.compare(password, result.password);
                 if (isMatch) {
-                    const token = Jwt.sign({result}, jwtKey, { algorithm: "HS256", expiresIn: "2h" });
-                    res.status(200).send(token ? { 'Login': true, 'user data': { id: result._id, name: result.name, email: result.email }, toke: token } : { 'Login': false });
+                    const token = Jwt.sign({ result }, jwtKey, { expiresIn: "2h" });
+                    const refreshToken = Jwt.sign({ result }, process.env.JWTKEYREFRESH, { expiresIn: '1d' });
+                    await client.client.set(result._id.toString(), refreshToken, "EX", 86400000);
+                    res.status(200).send(token ? { 'Login': true, 'user data': { id: result._id, name: result.name, email: result.email }, token, refreshToken } : { 'Login': false });
                 } else {
                     res.status(401).send({ Login: false, Reason: 'Invalid Credentials' });
                 }
             } else {
                 res.status(401).send({ Login: false, Reason: 'User Not Found' });
             }
-        } catch (e) {
-            res.status(500).send({ err: e })
+        } catch (err) {
+            console.log(err)
+            res.status(500).send(err)
         }
     }
 
@@ -61,7 +65,7 @@ class UserController {
 class PostController {
     static createPost = async (req, res) => {
         try {
-            res.send("Create Posts");
+            res.send("Create Posts" + req.user);
         } catch (e) {
             res.status(500).send({ err: e })
         }
@@ -69,7 +73,7 @@ class PostController {
 
     static viewPost = async (req, res) => {
         try {
-            res.send("View Posts");
+            res.send(req.user);
         } catch (e) {
             res.status(500).send({ err: e })
         }
