@@ -8,8 +8,7 @@ const userAuth = async (req, res, next) => {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
         if (!token) return res.sendStatus(401);
-        if (blackList.includes(token)) res.Status(403).send('Token Expired');
-        console.log(blackList)
+        //if (blackList.includes(token)) res.Status(403).send('Token Expired');
         Jwt.verify(token, process.env.JWTKEY, (err, user) => {
             if (err) return err.name === 'JsonWebTokenError' ? res.sendStatus(401) : res.status(401).send(err.message)
             req.user = user.result;
@@ -54,11 +53,11 @@ const Logout = async (req, res) => {
         if (!token) return res.sendStatus(401);
         Jwt.verify(token, process.env.JWTKEY, async (err, user) => {
             if (err) return res.sendStatus(403);
-            console.log(blackList.push(token));
+            //console.log(blackList.push(token));
             const result = user.result;
             const newToken = Jwt.sign({ result }, process.env.JWTKEY, { expiresIn: "3s" })
             await client.client.del(result._id.toString());
-            res.status(200).send({ newToken });
+            res.sendStatus(204)
         });
     } catch (err) {
         console.log(err);

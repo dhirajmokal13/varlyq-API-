@@ -18,6 +18,7 @@ class UserController {
                     const token = Jwt.sign({ result }, jwtKey, { expiresIn: "2h" });
                     const refreshToken = Jwt.sign({ result }, process.env.JWTKEYREFRESH, { expiresIn: '1d' });
                     await client.client.set(result._id.toString(), refreshToken, "EX", 86400000);
+                    //await client.client.set(`access token${result._id.toString()}`, refreshToken, "EX", 86400000);
                     res.status(200).send(token ? { 'Login': true, 'user data': { id: result._id, name: result.name, email: result.email }, token, refreshToken } : { 'Login': false });
                 } else {
                     res.status(401).send({ Login: false, Reason: 'Invalid Credentials' });
@@ -65,7 +66,9 @@ class UserController {
 class PostController {
     static createPost = async (req, res) => {
         try {
-            res.send("Create Posts" + req.user);
+            const { createdBy, message } = req.body;
+            const result = await new schema.Post({ createdBy, message }).save();
+            res.status(200).send(result ? { 'Created': true, 'Created Post': result } : { 'Created': false });
         } catch (e) {
             res.status(500).send({ err: e })
         }
@@ -73,7 +76,8 @@ class PostController {
 
     static viewPost = async (req, res) => {
         try {
-            res.send(req.user);
+            const result = await schema.Post.find();
+            res.status(200).send(result && result.length > 0 ? { 'Avaiable': true, 'Length': result.length, 'Posts': result } : { 'Avaiable': false });
         } catch (e) {
             res.status(500).send({ err: e })
         }
@@ -81,16 +85,22 @@ class PostController {
 
     static updatePost = async (req, res) => {
         try {
-            console.log(req.body);
-            res.send("update Posts");
+            let result;
+            if (req.body.message && req.body.comments) { result = await schema.Post.findOneAndUpdate({ _id: req.params.id, createdBy: req.user._id }, { $set: { message: req.body.message }, $push: { comments: { sentBy: req.user._id, liked: req.user._id } } }, { new: true }); }
+            else {
+                if (req.body.message) { result = await schema.Post.findOneAndUpdate({ _id: req.params.id, createdBy: req.user._id }, { $set: req.body }, { new: true }); }
+                if (req.body.comments) { result = await schema.Post.findOneAndUpdate({ _id: req.params.id, createdBy: req.user._id }, { $push: { comments: { sentBy: req.user._id, liked: req.user._id } } }, { new: true }); }
+            }
+            res.status(200).send(result ? { 'Update Post': true, 'Updated data': result } : { 'Update Post': false });
         } catch (e) {
-            res.status(500).send({ err: e })
+            res.status(500).send({ 'err': e })
         }
     }
 
     static deletePost = async (req, res) => {
         try {
-            res.send("delete Posts");
+            const result = await schema.Post.deleteOne({ _id: req.params.id, createdBy: req.user._id });
+            res.status(200).send(result ? { 'Delete Post': true, 'Deleted Post': result } : { 'Deleted': false });
         } catch (e) {
             res.status(500).send({ err: e })
         }

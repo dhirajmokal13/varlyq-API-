@@ -30,5 +30,5 @@ const postSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-const Schema = { Post: mongoose.model('Post', postSchema), User: mongoose.model('User', userSchema) };
+const Schema = { Post: mongoose.model('Post', postSchema), User: mongoose.model('User', userSchema)};
 module.exports = Schema;
