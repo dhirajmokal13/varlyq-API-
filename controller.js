@@ -86,6 +86,7 @@ class PostController {
     static updatePost = async (req, res) => {
         try {
             let result;
+            console.log(req.params.id, req.user._id)
             // if message and comments both want to update
             if (req.body.message && req.body.comments) { result = await schema.Post.findOneAndUpdate({ _id: req.params.id, createdBy: req.user._id }, { $set: { message: req.body.message }, $push: { comments: { sentBy: req.user._id, liked: req.user._id } } }, { new: true }); }
             else {
