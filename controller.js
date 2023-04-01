@@ -46,7 +46,7 @@ class UserController {
         try {
             const data = req.body;
             if (req.body.password) { req.body.password = await hash.hash(req.body.password, 10) }
-            const result = await schema.User.findByIdAndUpdate(req.params.id, { $set: data }, { new: true });
+            const result = await schema.User.findByIdAndUpdate(req.user._id, { $set: data }, { new: true });
             res.status(200).send(result ? { 'Updated': true, 'Updated data': result } : { 'Updated': false });
         } catch (e) {
             res.status(500).send({ err: e })
@@ -55,7 +55,7 @@ class UserController {
 
     static userDelete = async (req, res) => {
         try {
-            const result = await schema.User.findByIdAndDelete(req.params.id);
+            const result = await schema.User.findByIdAndDelete(req.user._id);
             res.status(200).send(result ? { 'Deleted': true, 'Deleted data': result } : { 'Deleted': false });
         } catch (e) {
             res.status(500).send({ err: e })
@@ -86,9 +86,12 @@ class PostController {
     static updatePost = async (req, res) => {
         try {
             let result;
+            // if message and comments both want to update
             if (req.body.message && req.body.comments) { result = await schema.Post.findOneAndUpdate({ _id: req.params.id, createdBy: req.user._id }, { $set: { message: req.body.message }, $push: { comments: { sentBy: req.user._id, liked: req.user._id } } }, { new: true }); }
             else {
+                //if only message want to update
                 if (req.body.message) { result = await schema.Post.findOneAndUpdate({ _id: req.params.id, createdBy: req.user._id }, { $set: req.body }, { new: true }); }
+                //if only comments want to update
                 if (req.body.comments) { result = await schema.Post.findOneAndUpdate({ _id: req.params.id, createdBy: req.user._id }, { $push: { comments: { sentBy: req.user._id, liked: req.user._id } } }, { new: true }); }
             }
             res.status(200).send(result ? { 'Update Post': true, 'Updated data': result } : { 'Update Post': false });

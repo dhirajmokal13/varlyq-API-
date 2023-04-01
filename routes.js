@@ -6,8 +6,8 @@ const { userAuth, refreshTokenAuth, Logout } = require('./middleware/auth');
 //User Routes
 router.get('/users', controller.user.userLogin); //For Login The user
 router.post('/users', controller.user.userCreate); // For Creating User
-router.put('/users/:id', userAuth, controller.user.userUpdate); //identify using the id and remaining data will be send in body using json
-router.delete('/users/:id', userAuth, controller.user.userDelete); //Idetify id and remove the user
+router.put('/users', userAuth, controller.user.userUpdate); //identify using the id and remaining data will be send in body using json
+router.delete('/users', userAuth, controller.user.userDelete); //Idetify id and remove the user
 
 //Post Routes
 router.get('/posts', userAuth, controller.post.viewPost); //should be only available for logged-in users after verifying the token from header

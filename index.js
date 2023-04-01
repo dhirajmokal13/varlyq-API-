@@ -8,7 +8,7 @@ const port = process.env.PORT;
 const routes = require('./routes');
 
 //Database Accessing
-conn(process.env.DATABASE_URL);
+conn(process.env.DATABASE_URL_CLOUD); //speed may be slow in case of cloud database
 //setting json middleware
 app.use(express.json());
 
