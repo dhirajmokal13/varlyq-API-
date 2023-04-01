@@ -1,4 +1,4 @@
-const dotenv = require('dotenv').config();;
+require('dotenv').config();;
 const schema = require('./Models');
 const hash = require('bcrypt');
 const Jwt = require('jsonwebtoken');
