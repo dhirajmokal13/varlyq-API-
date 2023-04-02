@@ -5,7 +5,7 @@ const { userAuth, refreshTokenAuth, Logout } = require('./middleware/auth');
 
 //if users send request to root then send request to documentation
 router.get('/', async (req, res) => {
-    req.redirect('https://documenter.getpostman.com/view/25159036/2s93RUuXjj');
+    res.redirect('https://documenter.getpostman.com/view/25159036/2s93RUuXjj');
 })
 
 //User Routes
