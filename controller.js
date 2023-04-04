@@ -15,6 +15,7 @@ class UserController {
             if (result != null) {
                 const isMatch = await hash.compare(password, result.password);
                 if (isMatch) {
+                    console.log(result)
                     const token = Jwt.sign({ result }, jwtKey, { expiresIn: "2h" });
                     const refreshToken = Jwt.sign({ result }, process.env.JWTKEYREFRESH, { expiresIn: '1d' });
                     await client.client.set(result._id.toString(), refreshToken, "EX", 86400000);
@@ -66,7 +67,8 @@ class UserController {
 class PostController {
     static createPost = async (req, res) => {
         try {
-            const { createdBy, message } = req.body;
+            const { message } = req.body;
+            const createdBy = req.user._id;
             const result = await new schema.Post({ createdBy, message }).save();
             res.status(200).send(result ? { 'Created': true, 'Created Post': result } : { 'Created': false });
         } catch (e) {
@@ -76,7 +78,7 @@ class PostController {
 
     static viewPost = async (req, res) => {
         try {
-            const result = await schema.Post.find();
+            const result = await schema.Post.find().populate('createdBy');
             res.status(200).send(result && result.length > 0 ? { 'Avaiable': true, 'Length': result.length, 'Posts': result } : { 'Avaiable': false });
         } catch (e) {
             res.status(500).send({ err: e })
