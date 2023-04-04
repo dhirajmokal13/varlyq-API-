@@ -78,7 +78,7 @@ class PostController {
 
     static viewPost = async (req, res) => {
         try {
-            const result = await schema.Post.find().populate('createdBy');
+            const result = await schema.Post.find().populate({ path: 'createdBy', select: 'name email mobile' });
             res.status(200).send(result && result.length > 0 ? { 'Avaiable': true, 'Length': result.length, 'Posts': result } : { 'Avaiable': false });
         } catch (e) {
             res.status(500).send({ err: e })
