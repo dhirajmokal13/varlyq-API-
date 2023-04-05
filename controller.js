@@ -15,11 +15,9 @@ class UserController {
             if (result != null) {
                 const isMatch = await hash.compare(password, result.password);
                 if (isMatch) {
-                    console.log(result)
                     const token = Jwt.sign({ result }, jwtKey, { expiresIn: "2h" });
                     const refreshToken = Jwt.sign({ result }, process.env.JWTKEYREFRESH, { expiresIn: '1d' });
                     await client.client.set(result._id.toString(), refreshToken, "EX", 86400000);
-                    //await client.client.set(`access token${result._id.toString()}`, refreshToken, "EX", 86400000);
                     res.status(200).send(token ? { 'Login': true, 'user data': { id: result._id, name: result.name, email: result.email }, token, refreshToken } : { 'Login': false });
                 } else {
                     res.status(401).send({ Login: false, Reason: 'Invalid Credentials' });
@@ -28,7 +26,6 @@ class UserController {
                 res.status(401).send({ Login: false, Reason: 'User Not Found' });
             }
         } catch (err) {
-            console.log(err)
             res.status(500).send(err)
         }
     }
@@ -39,7 +36,7 @@ class UserController {
             const result = await new schema.User({ name: name, email: email, mobile: mobile, password: await hash.hash(password, 10), }).save();
             res.status(200).send(result ? { 'Created': true, 'data': result } : { 'Created': false });
         } catch (e) {
-            res.status(500).send({ err: e })
+            res.status(500).send(e)
         }
     }
 
@@ -50,7 +47,7 @@ class UserController {
             const result = await schema.User.findByIdAndUpdate(req.user._id, { $set: data }, { new: true });
             res.status(200).send(result ? { 'Updated': true, 'Updated data': result } : { 'Updated': false });
         } catch (e) {
-            res.status(500).send({ err: e })
+            res.status(500).send(e)
         }
     }
 
@@ -59,7 +56,7 @@ class UserController {
             const result = await schema.User.findByIdAndDelete(req.user._id);
             res.status(200).send(result ? { 'Deleted': true, 'Deleted data': result } : { 'Deleted': false });
         } catch (e) {
-            res.status(500).send({ err: e })
+            res.status(500).send(e);
         }
     }
 }
@@ -72,7 +69,7 @@ class PostController {
             const result = await new schema.Post({ createdBy, message }).save();
             res.status(200).send(result ? { 'Created': true, 'Created Post': result } : { 'Created': false });
         } catch (e) {
-            res.status(500).send({ err: e })
+            res.status(500).send(e);
         }
     }
 
@@ -81,7 +78,7 @@ class PostController {
             const result = await schema.Post.find().populate({ path: 'createdBy', select: 'name email mobile' });
             res.status(200).send(result && result.length > 0 ? { 'Avaiable': true, 'Length': result.length, 'Posts': result } : { 'Avaiable': false });
         } catch (e) {
-            res.status(500).send({ err: e })
+            res.status(500).send(e);
         }
     }
 
@@ -99,7 +96,7 @@ class PostController {
             }
             res.status(200).send(result ? { 'Update Post': true, 'Updated data': result } : { 'Update Post': false });
         } catch (e) {
-            res.status(500).send({ 'err': e })
+            res.status(500).send(e);
         }
     }
 
@@ -108,7 +105,7 @@ class PostController {
             const result = await schema.Post.deleteOne({ _id: req.params.id, createdBy: req.user._id });
             res.status(200).send(result ? { 'Delete Post': true, 'Deleted Post': result } : { 'Deleted': false });
         } catch (e) {
-            res.status(500).send({ err: e })
+            res.status(500).send(e);
         }
     }
 }
